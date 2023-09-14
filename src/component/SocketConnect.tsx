@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 
-export const SocketConnect = (url: string) => {
+export default function SocketConnect(url: string): [boolean, any[], (request: any) => void] {
     const [isReady, setIsReady] = useState<boolean>(false);
     const [data, setData] = useState<any[]>([]);
 
@@ -20,5 +20,5 @@ export const SocketConnect = (url: string) => {
         }
     }, []);
 
-    return [isReady, data, ws.current?.send.bind(ws.current)] as const;
+    return [isReady, data, ws.current?.send.bind(ws.current)];
 }

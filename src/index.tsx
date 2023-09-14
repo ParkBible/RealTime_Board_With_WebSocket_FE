@@ -2,18 +2,26 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import SocketTest from "component/SocketTest";
 import Login from "./component/Login";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
+import PostDetail from "./component/PostDetail";
+import App from "./component/App";
+import {Provider} from "react-redux";
+import store from "./redux/store";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+
 root.render(
-    <BrowserRouter>
-        <Routes>
-            <Route path={"/"} element={<Login/>}/>
-            <Route path={"/socket"} element={<SocketTest/>}/>
-        </Routes>
-    </BrowserRouter>
+    <Provider store={store}>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Login/>}/>
+                <Route path="/login" element={<Login/>}/>
+                <Route path="/post" element={<App/>}/>
+                <Route path="/detail" element={<PostDetail/>}/>
+            </Routes>
+        </BrowserRouter>
+    </Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function
