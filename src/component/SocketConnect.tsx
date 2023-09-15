@@ -1,24 +1,30 @@
 import React, {useEffect, useRef, useState} from "react";
+import {defaultMessage} from "../dto/Message";
+import {MessageType} from "../constants/MessageType";
 
-export default function SocketConnect(url: string): [boolean, any[], (request: any) => void] {
-    const [isReady, setIsReady] = useState<boolean>(false);
-    const [data, setData] = useState<any[]>([]);
+export const ws: {current: any} = {
+    current: null
+}
+export let socket: any = null;
+export let isReady: boolean = false;
+export const send = (request: any) => {
+    ws.current?.send.bind(ws.current)(JSON.stringify(request));
+    // ws.current?.send(JSON.stringify(request));
+}
 
-    const ws: any = useRef(null);
+export default function SocketConnect(url: string, nickname: string, messageCallback: (msg: string) => void) {
+    const socket = new WebSocket(url);
 
-    useEffect(() => {
-        const socket = new WebSocket(url);
+    socket.onopen = () => {
+        isReady = true;
+        send({...defaultMessage, type: MessageType.NICKNAME, nickname: nickname});
+    };
+    socket.onclose = () => isReady = false;
+    socket.onmessage = (message: any) => messageCallback(message.data);
 
-        socket.onopen = () => setIsReady(true);
-        socket.onclose = () => setIsReady(false);
-        socket.onmessage = (message: any) => setData([...data, message.data]);
+    ws.current = socket;
 
-        ws.current = socket;
-
-        return () => {
-            socket.close();
-        }
-    }, []);
-
-    return [isReady, data, ws.current?.send.bind(ws.current)];
+    return () => {
+        socket.close();
+    }
 }

@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from "react";
 import {WEB_SOCKET} from "../ApiUrl";
 import {useNavigate} from "react-router-dom";
-import SocketConnect from "./SocketConnect";
-import {closeSocket, send, setSocket} from "../redux/socket.reducer";
 import {useDispatch, useSelector} from "react-redux";
+import socketConnect, {isReady, send} from "./SocketConnect";
+import SocketConnect from "./SocketConnect";
 
 export default function SocketTest() {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
     const socket = useSelector((state: any) => state.socket.socket);
     const ws = useSelector((state: any) => state.socket.ws);
 
@@ -16,37 +16,22 @@ export default function SocketTest() {
     const [request, setRequest] = React.useState<{nickname: string}>({nickname: ""});
     const [dataList, setDataList] = React.useState<any[]>([]);
 
-    // useEffect(() => {
-    //     dispatch(setSocket({url: WEB_SOCKET}));
-    // }, []);
-
     useEffect(() => {
-        if (!socket) {
-            const socket = new WebSocket(WEB_SOCKET);
-            socket.onopen = () => setIsReady(true);
-            socket.onclose = () => setIsReady(false);
-            socket.onmessage = (message) => setData([...data, message.data]);
-
-            dispatch(setSocket({socket: socket}));
-        }
-
-        return () => {
-            dispatch(setSocket(null));
-        }
+        SocketConnect(WEB_SOCKET, localStorage.getItem("nickname")!!, messageCallback);
     }, []);
 
-    // useEffect(() => {
-    //     setDataList([...dataList, data])
-    // }, [data]);
+    const messageCallback = (msg: string) => {
+        setDataList(prevState => (
+            [...prevState, msg]
+        ));
+    }
 
     const onSend = () => {
-        dispatch(send({message: "테스트"}));
+        send("test")
     }
 
     const logout = () => {
         localStorage.removeItem("nickname");
-        // dispatch(closeSocket())
-        // dispatch(setSocket(null));
         navigate("/login");
     }
 
@@ -61,10 +46,10 @@ export default function SocketTest() {
             <br/>
 
             <div>
-                {/*Ready: {ready ? "true" : "false"}*/}
+                Ready: {isReady ? "true" : "false"}
             </div>
             <div>
-                {/*Data: {data}*/}
+                Data: {data}
             </div>
             <button onClick={onSend}>
                 send
